@@ -210,10 +210,7 @@ const PowerSwitch = ({handlePowerSwitch, powerFloatProp}) => {
 function App(){
   const [power, setPower] = React.useState(true)
   const [volume, setVolume] = React.useState(50)
-  // jakoś w state ustawisz info do wyświetlania na ezz, tak jak ten gość to zrobił
-  // i potem jakoś na onclick (w atrybutach w App na DrumButton jakoś zmienisz wartość soundName)
   const [soundName, setSoundName] = React.useState('')
-  // jak coś tu nie będzie działać to spójrz na dół w rady
   const [bank, setBank] = React.useState(bankOne)
   const [bankName, setBankName] = React.useState('Smooth Piano Kit')
   const [bankFloatProp, setBankFloatProp] = React.useState('right')
@@ -290,26 +287,3 @@ function App(){
 }
 
 export default App;
-
-
-// A NA SAM SAM SAM SAMIUTKI KONIEC: dodaj wszędzie komentarze żeby powtórzyć kod i jeszcze lepiej wszystko zrozumieć
-
-// TASKI:
-// - wyświetlanie się defaultowego banka po ponownym włączeniu
-// - wystylować ładniej (slider, przyciski...)
-// - ŻEBY JUŻ BYŁ GOTOWY POD PORTFOLIO!! 
-    // - dodać speed i recording features stąd: (obejrzyj jeszcze raz i spróbuj sam zaimplementować) --> https://www.youtube.com/watch?v=HTTaO1IjjlM&ab_channel=LandonSchlangen
-
-
-// PYTANIA DO KACPERRA:
- // o co chodzi z tymi eventami dokładnie w listenerach?
-  // czemu działa bez '[]' z tym returnem, i na odwrót, ale wywala błąd jeśli nie ma obu? 
-    // zapytać jednak potem Kacpra czemu nie działało to rozwiązanie i jak dokładnie działa ten hook useRef i kiedy current się przypisuje
-  // zapytać także kacpra o działanie tego add event listenera i że ten drugi return rozumiem się nie wykona zanim event się nie stanie tak??
-
-
-// info do hooków: ZROBIĆ TEŻ TAK Z INNYMI OGLĄDAJĄC FILMIKI!!!!
-// useState:
-// - jeśli wywołasz funkcję w useState, zamiast dawać samą wartość, to przypisze (wywoła) się ona tylko raz, a standardowo dzieje się to za każdym razem(10:45 Kyle video) (it enhances performance)
-// - używaj funckji z parametrem prevValue kiedy robisz setState! inaczej jeśli próbujesz zrobić np. setCount(count++) i w next linijce znowu to samo to i tak ostatecznie count doda się tylko raz, bo dzieje się nadpisanie count (bo count sprawdza aktualną wartość i wartość stanu(count) zmienia się dopiero po nowym renderze)
-// - obiekty się nie mergują w setState!!, zwraca się całowicie nowy obiekt ---> musisz wtedy użyć spread operator, żeby skopiowały się wszystkie wartości, a potem nadpisać inne (np. setState(prevState => {return { ...prevState, count: prevState.coount - 1}}))  ---> ale ogólnie lepiej jest zostawić obiekty w spokoju i tworzyć kilka useState
