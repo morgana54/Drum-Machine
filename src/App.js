@@ -1,6 +1,8 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 import './index.css'
 
+// @CR should be an object 
+// { name: string; sounds: { keyCode: number }[] }
 const bankOne = [
   {
     keyCode: 81,
@@ -116,6 +118,12 @@ const bankTwo = [
   }
 ];
 
+// @CR you could group banks into an object
+// const banks = {
+//   bankOne,
+//   bankTwo
+// }
+
 const DrumButton = ({url, trigger, keyCode, volume, soundName, handleSound, power}) => {
   const [active, setActive] = useState(false)
   const audioRef = useRef()
@@ -190,7 +198,9 @@ const BankSwitch = ({handleBankSwitch, bankFloatProp, power}) => {
   );
 }
 
-const PowerSwitch = ({handlePowerSwitch, powerFloatProp}) => {
+const PowerSwitch = ({handlePowerSwitch, powerFloatProp
+// @CR bankId
+}) => {
   return (
     <>
       <h4>Power</h4>
@@ -199,6 +209,7 @@ const PowerSwitch = ({handlePowerSwitch, powerFloatProp}) => {
         className="switch" 
         onClick={handlePowerSwitch}
         style={{float: powerFloatProp}}>
+          {/* bankId === 'bankOne' &&  */}
           {powerFloatProp === 'right' && <p className="switch-on">ON</p>}
           {powerFloatProp === 'left' && <p className="switch-off">OFF</p>}
         </div>
@@ -207,19 +218,31 @@ const PowerSwitch = ({handlePowerSwitch, powerFloatProp}) => {
   );
 }
 
+
+
 function App(){
+  // @CR isMachineOn, setIsMachineOn
   const [power, setPower] = React.useState(true)
+  // @CR add a comment is a number from 0 - 100
   const [volume, setVolume] = React.useState(50)
+  // @CR soundIdCurrentlyPlaying, setSoundIdCurrentlyPlaying
   const [soundName, setSoundName] = React.useState('')
+  // @CR add an explanation comment
+  // @CR you should store bankId instead e.g 'bankOne' || 'bankTwo'
   const [bank, setBank] = React.useState(bankOne)
+  // @CR bankName should be a part of bank object (see comment next to objects on the top)
   const [bankName, setBankName] = React.useState('Smooth Piano Kit')
+  // @CR should be a part of banks
   const [bankFloatProp, setBankFloatProp] = React.useState('right')
+  // @CR could be replaced with use of isMachineOn
   const [powerFloatProp, setPowerFloatProp] = React.useState('right')
 
-  function changeVolume(event) {
+  // @CR read about useCallback, watch webdev simplified and memoization
+  const changeVolume = useCallback((event) => {
     // to powoduje ponowny rendering
-    setVolume(event.target.value)
-  }
+      setVolume(event.target.value)
+  }, [setVolume])
+  
 
   function handleSound(sound) {
     setSoundName(sound)
