@@ -1,3 +1,9 @@
+:root {
+    --backBlue: rgb(60, 212, 223);
+    --backDarkBlue: rgb(107, 136, 231);
+    --backViolet: rgb(226, 123, 226);
+} 
+
 body {
     margin: 0;
     font-family: sans-serif;
@@ -8,12 +14,24 @@ body {
     justify-content: center;
     height: 100vh;
     width: 100vw;
+    background-image: linear-gradient(225deg,
+        var(--backViolet), 
+        var(--backBlue), 
+        var(--backDarkBlue), 
+        var(--backBlue), 
+        var(--backViolet), 
+        var(--backBlue),
+        var(--backDarkBlue), 
+        var(--backBlue), 
+        var(--backViolet)
+    );
 }
 .drums-container {
     background-color: rgb(94, 174, 224);
     border: 3px solid rgb(0, 113, 158) ;
     width: 500px;
     height: 550px;
+    border-radius: 3%;
 }
 
 .drum-pads {
@@ -126,12 +144,6 @@ h2 {
 }
 
 .volume-slider {
-    width: 170px;
-    background-color: rgb(4, 223, 212);;
-}
-
-p {
-    margin: 0;
-    margin-top: 5px;
+    width: 180px;
 }
 
