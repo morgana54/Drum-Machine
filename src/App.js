@@ -1,166 +1,52 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import './index.css'
+import { bankOne, bankTwo } from './banksData'
 
-// @CR should be an object 
-// { name: string; sounds: { keyCode: number }[] }
-const bankOne = [
-  {
-    keyCode: 81,
-    keyTrigger: 'Q',
-    id: 'Heater-1',
-    url: 'https://s3.amazonaws.com/freecodecamp/drums/Heater-1.mp3'
-  },
-  {
-    keyCode: 87,
-    keyTrigger: 'W',
-    id: 'Heater-2',
-    url: 'https://s3.amazonaws.com/freecodecamp/drums/Heater-2.mp3'
-  },
-  {
-    keyCode: 69,
-    keyTrigger: 'E',
-    id: 'Heater-3',
-    url: 'https://s3.amazonaws.com/freecodecamp/drums/Heater-3.mp3'
-  },
-  {
-    keyCode: 65,
-    keyTrigger: 'A',
-    id: 'Heater-4',
-    url: 'https://s3.amazonaws.com/freecodecamp/drums/Heater-4_1.mp3'
-  },
-  {
-    keyCode: 83,
-    keyTrigger: 'S',
-    id: 'Clap',
-    url: 'https://s3.amazonaws.com/freecodecamp/drums/Heater-6.mp3'
-  },
-  {
-    keyCode: 68,
-    keyTrigger: 'D',
-    id: 'Open-HH',
-    url: 'https://s3.amazonaws.com/freecodecamp/drums/Dsc_Oh.mp3'
-  },
-  {
-    keyCode: 90,
-    keyTrigger: 'Z',
-    id: "Kick-n'-Hat",
-    url: 'https://s3.amazonaws.com/freecodecamp/drums/Kick_n_Hat.mp3'
-  },
-  {
-    keyCode: 88,
-    keyTrigger: 'X',
-    id: 'Kick',
-    url: 'https://s3.amazonaws.com/freecodecamp/drums/RP4_KICK_1.mp3'
-  },
-  {
-    keyCode: 67,
-    keyTrigger: 'C',
-    id: 'Closed-HH',
-    url: 'https://s3.amazonaws.com/freecodecamp/drums/Cev_H2.mp3'
-  }
-];
-
-
-const bankTwo = [
-  {
-    keyCode: 81,
-    keyTrigger: 'Q',
-    id: 'Chord-1',
-    url: 'https://s3.amazonaws.com/freecodecamp/drums/Chord_1.mp3'
-  },
-  {
-    keyCode: 87,
-    keyTrigger: 'W',
-    id: 'Chord-2',
-    url: 'https://s3.amazonaws.com/freecodecamp/drums/Chord_2.mp3'
-  },
-  {
-    keyCode: 69,
-    keyTrigger: 'E',
-    id: 'Chord-3',
-    url: 'https://s3.amazonaws.com/freecodecamp/drums/Chord_3.mp3'
-  },
-  {
-    keyCode: 65,
-    keyTrigger: 'A',
-    id: 'Shaker',
-    url: 'https://s3.amazonaws.com/freecodecamp/drums/Give_us_a_light.mp3'
-  },
-  {
-    keyCode: 83,
-    keyTrigger: 'S',
-    id: 'Open-HH',
-    url: 'https://s3.amazonaws.com/freecodecamp/drums/Dry_Ohh.mp3'
-  },
-  {
-    keyCode: 68,
-    keyTrigger: 'D',
-    id: 'Closed-HH',
-    url: 'https://s3.amazonaws.com/freecodecamp/drums/Bld_H1.mp3'
-  },
-  {
-    keyCode: 90,
-    keyTrigger: 'Z',
-    id: 'Punchy-Kick',
-    url: 'https://s3.amazonaws.com/freecodecamp/drums/punchy_kick_1.mp3'
-  },
-  {
-    keyCode: 88,
-    keyTrigger: 'X',
-    id: 'Side-Stick',
-    url: 'https://s3.amazonaws.com/freecodecamp/drums/side_stick_1.mp3'
-  },
-  {
-    keyCode: 67,
-    keyTrigger: 'C',
-    id: 'Snare',
-    url: 'https://s3.amazonaws.com/freecodecamp/drums/Brk_Snr.mp3'
-  }
-];
-
-// @CR you could group banks into an object
-// const banks = {
-//   bankOne,
-//   bankTwo
-// }
-
-const DrumButton = ({url, trigger, keyCode, volume, soundName, handleSound, power}) => {
+// soundName={clip.id}
+// url={clip.url} 
+// trigger={clip.keyTrigger}
+// keyCode={clip.keyCode} 
+// @CR do not use more parameters than you need
+const DrumButton = ({
+  clip: { url, keyTrigger: trigger, keyCode, id: soundName },
+  volume,
+  setSoundName,
+  power
+}) => {
   const [active, setActive] = useState(false)
   const audioRef = useRef()
  
+  // @CR (optional) register only one event in App instead of in 9 in DrumButtons
   useEffect(() => {
-    
-      if(power) {
-        document.addEventListener('keydown', handleKeyPress)
-        // WebDevSimp świetnie to tłumaczy: return to cleanup i wykona się przed nowym renderem (componentWillUnmount??)
-        return () => document.removeEventListener('keydown', handleKeyPress)
-      } else {
+      if(!power) {
         return
       }
-  }, [volume])
+      const cb = (event) => {
+        if(event.keyCode === keyCode) {
+          playSound(power, volume)
+        } 
+      }
+      document.addEventListener('keydown', cb)
+      // WebDevSimp świetnie to tłumaczy: return to cleanup i wykona się przed nowym renderem (componentWillUnmount??)
+      return () => document.removeEventListener('keydown', cb)
+  }, [power, volume])
 
-  function playSound() {
+  // Zmienilismy zaleznosc playSound od power i volume ze scope'a (closure'a) na parametry
+  // przez co nasza funkcja jest duzo bardziej przewidywalna i łatwiejsza do debugowania
+  function playSound(power, volume) {
     if(!(power && audioRef.current)) {
       return
     }
     audioRef.current.currentTime = 0
     audioRef.current.volume = volume / 100
     audioRef.current.play()
-    handleSound(soundName)
+    setSoundName(soundName)
     setActive(true)
     setTimeout(() => setActive(false), 200)
   }
 
-  function handleKeyPress(event) {  
-    if(event.keyCode === keyCode) {
-      playSound()
-    } else {
-      return
-    } 
-  }
-
   return (
-    <div className={`drum-pad ${active && "drum-pad--active"}`} onClick={playSound}>
+    <div className={`drum-pad ${active && "drum-pad--active"}`} onClick={() => playSound(power, volume)}>
       <audio ref={audioRef} src={url}></audio>
       <div className="drum-letter">{trigger}</div>
     </div>
@@ -170,33 +56,36 @@ const DrumButton = ({url, trigger, keyCode, volume, soundName, handleSound, powe
 const InfoBox = ({volume, soundName, bankName}) => {
   return (
   <div className='info-box'>
+    {/* @CR span better */}
     <p>Volume: {volume}</p>
     <p>Bank: {bankName}</p>
     <p>Sound: {soundName}</p>
   </div>);
 }
 
+// @CR power -> disabled leverage native 'disabled' prop on input
 const VolumeSlider = ({volume, changeVolume, power}) => {
   return (
     <div>
-      <input className="volume-slider" onChange={power ? changeVolume : null} value={power ? volume  : 0} type="range" min="0" max="100" />
+      <input disabled={!power} className="volume-slider" onChange={power ? changeVolume : null} value={power ? volume  : 0} type="range" min="0" max="100" />
     </div>
   );
 }
 
-const BankSwitch = ({handleBankSwitch, bankFloatProp, power}) => {
-  return (
-    <>
-      <h4>Bank</h4>
-      <div className="switch-background">
-        <div 
-        className="switch" 
-        onClick={power ? handleBankSwitch : null}
-        style={{float: bankFloatProp}}/>
-      </div> 
-    </> 
-  );
-}
+const Switch = ({isRight, setIsRight, label, disabled, labelRight = '', labelLeft = ''}) => (
+  <>
+    <h4>{label}</h4>
+    <div className="switch-background">
+      <div
+      className="switch" 
+      // if (!disabled) { setEnabled(!enabled) }
+      onClick={() => !disabled && setIsRight(!isRight)}
+      style={{float: isRight ? 'right' : 'left'}}>
+        {isRight ? labelRight : labelLeft}
+        </div>
+    </div> 
+  </>
+)
 
 const PowerSwitch = ({handlePowerSwitch, powerFloatProp
 // @CR bankId
@@ -243,11 +132,6 @@ function App(){
       setVolume(event.target.value)
   }, [setVolume])
   
-
-  function handleSound(sound) {
-    setSoundName(sound)
-  }
-
   function handleBankSwitch() {
     if(bankFloatProp === 'right') {
       setBank(bankOne)
@@ -260,21 +144,15 @@ function App(){
     }
   }
 
-  function handlePowerSwitch() {
-    if(powerFloatProp === 'right') {
-      setPowerFloatProp('left')
-      setPower(!power)
-    } else {
-      setPowerFloatProp('right')
-      setPower(!power)
-      setVolume(50)
-    }
+  function handlePowerSwitch(newIsOn) {
+    // By that you make it more digestible
+    // @CR replace magic numbers with well named constants
+    const MEDIUM_VOLUME = 50
+    const ZERO_VOLUME = 0
 
-    if(power) {
-      setVolume(0)
-      setSoundName('')
-      setBankName('')
-    }
+    setPower(newIsOn)
+
+    setVolume(newIsOn ? MEDIUM_VOLUME : ZERO_VOLUME)
   }
  
   return (
@@ -286,22 +164,31 @@ function App(){
             <DrumButton 
             clip={clip}
             key={clip.id} 
-            soundName={clip.id}
-            url={clip.url} 
-            trigger={clip.keyTrigger}
-            keyCode={clip.keyCode} 
             volume={volume}
-            handleSound={handleSound}
+            setSoundName={setSoundName}
             power={power}/> 
             )}
         </div>  
         <div className="control-panel">
-          <InfoBox volume={volume} soundName={soundName} bankName={bankName}/>
+          <InfoBox volume={volume} soundName={!power ? '' : soundName} bankName={!power ? '' : bankName} />
           {/* to potem też możesz jakoś przefaktorować na dynamiczny Switch komponent do którego będziesz dawać różne propsy i w zależności od tego będzie miał funkcję power i bank, ale to dopiero na SAAAAMIUTKI koniec*/}
           <div className='controls'>
-            <BankSwitch handleBankSwitch={handleBankSwitch} bankFloatProp={bankFloatProp} power={power}/>
+            <Switch
+              disabled={!power}
+              isRight={bankName === 'Heater Kit'}
+              setIsRight={(newIsRight) => 
+                setBankName(newIsRight ?  'Heater Kit' : 'Smooth Piano Kit')
+              }
+              label='Bank'
+            />
             <VolumeSlider volume={volume} changeVolume={changeVolume} power={power}/>
-            <PowerSwitch handlePowerSwitch={handlePowerSwitch} powerFloatProp={powerFloatProp} />
+            <Switch
+              isRight={power}
+              setIsRight={handlePowerSwitch}
+              labelRight={<span className="switch-on">ON</span>}
+              labelLeft={<span className="switch-off">OFF</span>}
+              label='Power'
+            />
           </div>
         </div>
       </div> 
