@@ -2,61 +2,6 @@ import React, { useRef, useState, useEffect, useCallback } from 'react';
 import './index.css'
 import { bankOne, bankTwo } from './banksData'
 
-// soundIdCurrentlyPlaying={clip.id}
-// url={clip.url} 
-// trigger={clip.keyTrigger}
-// keyCode={clip.keyCode} 
-// @CR do not use more parameters than you need
-const DrumButton = ({
-  clip: { url, keyTrigger: trigger, keyCode, id: soundIdCurrentlyPlaying },
-  volume,
-  setSoundIdCurrentlyPlaying,
-  isMachineOn
-}) => {
-  const [active, setActive] = useState(false)
-  const audioRef = useRef()
- 
-  // @CR (optional) register only one event in App instead of in 9 in DrumButtons
-  useEffect(() => {
-    // If drums are turned off do nothing
-    if(!isMachineOn) {
-      return
-    }
-    // Declare callback
-    const cb = (event) => {
-      // If code of pressed button equals one of the drum's one - playSound
-      if(event.keyCode === keyCode) {
-        playSound(isMachineOn, volume)
-      } 
-    }
-    document.addEventListener('keydown', cb)
-    // WebDev super to tłumaczy: 
-    // return to cleanup i wykona się przed nowym renderem
-    return () => document.removeEventListener('keydown', cb)
-  }, [isMachineOn, volume])
-
-  // Zmienilismy zaleznosc playSound od isMachineOn i volume ze scope'a (closure'a) na parametry
-  // przez co nasza funkcja jest duzo bardziej przewidywalna i łatwiejsza do debugowania
-  function playSound(isMachineOn, volume) {
-    if(!(isMachineOn && audioRef.current)) {
-      return
-    }
-    audioRef.current.currentTime = 0
-    audioRef.current.volume = volume / 100
-    audioRef.current.play()
-    setSoundIdCurrentlyPlaying(soundIdCurrentlyPlaying)
-    setActive(true)
-    setTimeout(() => setActive(false), 200)
-  }
-
-  return (
-    <div className={`drum-pad ${active && "drum-pad--active"}`} onClick={() => playSound(isMachineOn, volume)}>
-      <audio ref={audioRef} src={url}></audio>
-      <div className="drum-letter">{trigger}</div>
-    </div>
-  );
-}
-
 const InfoBox = ({volume, soundIdCurrentlyPlaying, bankIdCurrentlyPlaying}) => {
   return (
   <div className='info-box'>
@@ -90,6 +35,67 @@ const Switch = ({isRight, setIsRight, label, disabled, labelRight = '', labelLef
   </>
 )
 
+// soundIdCurrentlyPlaying={clip.id}
+// url={clip.url} 
+// trigger={clip.keyTrigger}
+// keyCode={clip.keyCode} 
+// @CR do not use more parameters than you need
+const DrumButton = ({
+  clip: { url, keyTrigger: trigger, keyCode, id: soundIdCurrentlyPlaying },
+  volume,
+  setSoundIdCurrentlyPlaying,
+  isMachineOn,
+  recording,
+  setRecording
+}) => {
+  const [active, setActive] = useState(false)
+  const audioRef = useRef()
+  console.log(trigger)
+  // @CR (optional) register only one event in App instead of in 9 in DrumButtons
+  // Handle key press
+  useEffect(() => {
+    
+    // If drums are turned off do nothing
+    if(!isMachineOn) {
+      return
+    }
+    // Declare callback
+    const cb = (event) => {
+      // console.log('eff ' + trigger)
+      // If code of pressed button equals one of the drum's one - playSound
+      if(event.keyCode === keyCode) {
+        playSound(isMachineOn, volume, trigger)
+      } 
+    }
+    document.addEventListener('keydown', cb)
+    // WebDev super to tłumaczy: 
+    // return to cleanup i wykona się przed nowym renderem
+    return () => document.removeEventListener('keydown', cb)
+  }, [isMachineOn, volume])
+
+  // Zmienilismy zaleznosc playSound od isMachineOn i volume ze scope'a (closure'a) na parametry
+  // przez co nasza funkcja jest duzo bardziej przewidywalna i łatwiejsza do debugowania
+  function playSound(isMachineOn, volume, trigger) {
+    if(!(isMachineOn && audioRef.current)) {
+      return
+    }
+    audioRef.current.currentTime = 0
+    audioRef.current.volume = volume / 100
+    audioRef.current.play()
+    setSoundIdCurrentlyPlaying(soundIdCurrentlyPlaying)
+    setActive(true)
+    setRecording(prevRecording => prevRecording + trigger + '')
+    setTimeout(() => setActive(false), 200)
+  }
+
+  return (
+    <div className={`drum-pad ${active && "drum-pad--active"}`} onClick={() => playSound(isMachineOn, volume, trigger)}>
+      <audio ref={audioRef} src={url} id={trigger}></audio>
+      <div className="drum-letter">{trigger}</div>
+    </div>
+  );
+}
+
 function App(){
   const [isMachineOn, setIsMachineOn] = React.useState(true)
   // Volume is a number from 0 to 100
@@ -98,6 +104,28 @@ function App(){
   // @CR you should store bankId instead e.g 'bankOne' || 'bankTwo'
   const [bankCurrentlyPlaying, setBankCurrentlyPlaying] = React.useState(bankOne)
   const [bankIdCurrentlyPlaying, setBankIdCurrentlyPlaying] = React.useState('Heater Kit')
+  const [recording, setRecording] = React.useState("")
+  const [recordingPlaying, setRecordingPlaying] = React.useState(false)
+
+  async function playRecording() {
+    if(recordingPlaying) {
+      return
+    }
+    setRecordingPlaying(true)
+
+    const letters = recording.split('')
+
+    for(const letter of letters) {
+      const $audio = document.querySelector(`#${letter}`)
+      $audio.currentTime = 0
+      $audio.volume = volume / 100
+      $audio.play()
+
+      await new Promise(res => $audio.onended = res)
+    }
+
+    setRecordingPlaying(false)
+  }
 
   // @CR read about useCallback, watch webdev simplified and memoization
   const changeVolume = useCallback((event) => {
@@ -114,6 +142,7 @@ function App(){
     setIsMachineOn(newIsOn)
     setVolume(newIsOn ? MEDIUM_VOLUME : ZERO_VOLUME)
   }
+
  
   return (
     <div className="wrapper">
@@ -126,9 +155,21 @@ function App(){
           key={clip.id} 
           volume={volume}
           setSoundIdCurrentlyPlaying={setSoundIdCurrentlyPlaying}
-          isMachineOn={isMachineOn}/> 
+          isMachineOn={isMachineOn}
+          recording={recording}
+          setRecording={setRecording}/> 
         )}
         </div>  
+        <div className="recordingBox">
+          <h3>{recording}</h3>
+          {recording && (
+            <div className="recordingButtons">
+            {/* USTAW TAKŻE LIMIT DŁUGOŚCI RYTMU! */}
+              <button className="playBtn" onClick={playRecording}>play</button>
+              <button className="clearBtn" onClick={() => setRecording("")}>clear</button>
+            </div>
+          )}
+        </div>
         <div className="control-panel">
           <InfoBox 
           volume={volume} 

@@ -8,6 +8,7 @@ body {
     margin: 0;
     font-family: sans-serif;
 }
+
 .wrapper {
     display: flex;
     align-items: center;
@@ -26,12 +27,14 @@ body {
         var(--backViolet)
     );
 }
+
 .drums-container {
     background-color: rgb(94, 174, 224);
     border: 3px solid rgb(0, 113, 158) ;
     width: 500px;
-    height: 550px;
+    height: 650px;
     border-radius: 3%;
+    box-shadow: 1px 1px 6px rgb(0, 45, 247);
 }
 
 .drum-pads {
@@ -59,7 +62,6 @@ body {
     padding-top: 13px;
     color: rgb(0, 78, 245);
     font-weight: 600;
-    /* text-shadow: 2px 2px 2px rgb(234, 236, 236); */
 }
 
 .drum-pad--active {
@@ -147,3 +149,40 @@ h2 {
     width: 180px;
 }
 
+.recordingBox {
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.recordingBox h3 {
+    font-size: 1.5em;
+    margin: 0px 0px 10px 0px;
+    font-weight: 400;
+}
+
+.playBtn, .clearBtn {
+    padding: 10px;
+    width: 70px;
+    margin: 0px 10px;
+    font-size: 1.1em;
+    border: none;
+    border-radius: 5%;
+}
+
+.playBtn:focus, .clearBtn:focus{
+    outline: none;
+}
+
+.playBtn:hover, .clearBtn:hover{
+    cursor: pointer;
+}
+
+.playBtn {
+    background-color: rgb(158, 241, 74);
+}
+
+.clearBtn {
+    background-color: rgb(218, 80, 108);
+}
